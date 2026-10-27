@@ -34,9 +34,11 @@ button{font-family:inherit;color:inherit}
 .strip-in{display:flex;align-items:center;gap:34px;padding:0 var(--gutter);overflow-x:auto;scrollbar-width:none}
 .strip-in::-webkit-scrollbar{display:none}
 .strip .label{flex:none;font-size:9.5px;letter-spacing:.3em;color:var(--muted)}
-.strip button{flex:none;background:none;border:0;border-bottom:1px solid transparent;padding:18px 0 17px;color:var(--muted);font-size:10.5px;letter-spacing:.24em;text-transform:uppercase;cursor:pointer}
-.strip button:hover{color:var(--white)}
-.strip button[aria-current]{color:var(--white);border-bottom-color:var(--white)}
+.strip-in{gap:12px;padding-top:14px;padding-bottom:14px}
+.strip .label{margin-right:12px}
+.strip button{flex:none;min-height:40px;padding:0 18px;background:#0d0d0d;border:1px solid rgba(255,255,255,.28);color:rgba(255,255,255,.8);font-size:10px;letter-spacing:.22em;text-transform:uppercase;cursor:pointer;transition:background .2s,border-color .2s,color .2s}
+.strip button:hover{border-color:#fff;color:#fff;background:#161616}
+.strip button[aria-current]{background:#fff;border-color:#fff;color:#000;font-weight:500}
 
 /* Layout */
 .wrap{max-width:1440px;margin:0 auto;padding:36px var(--gutter) 110px;display:flex;flex-wrap:wrap;align-items:flex-start;gap:40px}
@@ -67,7 +69,14 @@ h1{margin:14px 0 0;font-size:34px;font-weight:300;letter-spacing:.04em;color:var
 /* Watermark overlay */
 .wm{position:relative;overflow:hidden;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}
 .wm img{pointer-events:none;-webkit-user-drag:none}
-.wm::after{content:"";position:absolute;inset:0;background-image:var(--wm);background-size:260px 120px;pointer-events:none}
+.wm::after{content:"";position:absolute;inset:0;pointer-events:none;
+  background-image:var(--wm-big),var(--wm);
+  background-repeat:no-repeat,repeat;
+  background-position:center,center;
+  background-size:92% auto,200px 90px;
+  -webkit-mask-image:radial-gradient(ellipse 75% 70% at center,#000 45%,rgba(0,0,0,.55) 100%);
+          mask-image:radial-gradient(ellipse 75% 70% at center,#000 45%,rgba(0,0,0,.55) 100%)}
+.folder .th.wm::after,.list .mini.wm::after{background-image:var(--wm);background-size:110px 50px}
 
 /* Folders */
 .folders{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:16px;margin-top:30px}
@@ -122,6 +131,13 @@ h1{margin:14px 0 0;font-size:34px;font-weight:300;letter-spacing:.04em;color:var
 .field input{height:46px;padding:0 14px;background:var(--panel);border:1px solid var(--line-2);color:#fff;font:inherit;font-size:14px;outline:none;border-radius:0}
 .field input:focus{border-color:#fff}
 .btn{height:52px;padding:0 24px;background:#fff;border:0;color:#000;font-size:11px;font-weight:500;letter-spacing:.26em;cursor:pointer;display:inline-flex;align-items:center;justify-content:center}
+#payBtn{white-space:nowrap;letter-spacing:.2em;font-size:10.5px}
+.btn.glow:not(:disabled){box-shadow:0 0 0 1px #fff,0 0 14px rgba(255,255,255,.55),0 0 38px rgba(255,255,255,.28);animation:neon 2.4s ease-in-out infinite;transition:box-shadow .2s,transform .2s}
+.btn.glow:not(:disabled):hover{box-shadow:0 0 0 1px #fff,0 0 20px rgba(255,255,255,.8),0 0 60px rgba(255,255,255,.4);transform:translateY(-1px)}
+@keyframes neon{0%,100%{box-shadow:0 0 0 1px #fff,0 0 12px rgba(255,255,255,.45),0 0 30px rgba(255,255,255,.2)}50%{box-shadow:0 0 0 1px #fff,0 0 22px rgba(255,255,255,.75),0 0 54px rgba(255,255,255,.35)}}
+@media (prefers-reduced-motion:reduce){.btn.glow{animation:none!important}}
+.clear{background:none;border:0;padding:6px 0;color:var(--muted);font-size:9.5px;letter-spacing:.24em;text-transform:uppercase;cursor:pointer;text-decoration:underline;text-underline-offset:4px}
+.clear:hover{color:#fff}
 .btn:disabled{background:none;border:1px solid var(--line-2);color:rgba(255,255,255,.45);cursor:default}
 .btn.ghost{background:none;border:1px solid rgba(255,255,255,.35);color:#fff;height:42px;font-size:9.5px;font-weight:400}
 .fine{margin:0;font-size:10.5px;line-height:1.7;color:var(--muted)}
@@ -206,6 +222,7 @@ h1{margin:14px 0 0;font-size:34px;font-weight:300;letter-spacing:.04em;color:var
     <h2>TU SELECCIÓN</h2>
     <span class="caps" style="font-size:10px;letter-spacing:.2em;color:var(--muted)" id="cCount">0 FOTOS</span>
   </div>
+  <button class="clear" type="button" data-clear id="cClear" hidden style="align-self:flex-start;margin-top:-12px">DESELECCIONAR TODAS</button>
   <p class="fine" id="cEmpty">Todavía no elegiste fotos. Entrá a un evento y tocá las que quieras llevarte.</p>
   <ul class="list" id="cList"></ul>
   <div class="sum">
@@ -220,14 +237,14 @@ h1{margin:14px 0 0;font-size:34px;font-weight:300;letter-spacing:.04em;color:var
       <input id="mail" type="email" inputmode="email" autocomplete="email" placeholder="nombre@mail.com" required>
     </div>
     <p class="err" id="cErr" hidden></p>
-    <button class="btn" id="payBtn" type="submit" disabled>PAGAR CON MERCADO PAGO</button>
+    <button class="btn glow" id="payBtn" type="submit" disabled>PAGAR CON MERCADO PAGO</button>
   </form>
   <p class="fine">Tarjeta, débito, transferencia o dinero en cuenta. Al aprobarse el pago descargás cada foto en alta calidad y sin marca de agua.</p>
 </aside>
 
 <div class="bar" id="bar" hidden>
   <div class="b1"><span id="bCount">0 FOTOS</span><strong id="bTotal">$0</strong></div>
-  <button class="btn" id="bOpen" type="button">VER Y PAGAR</button>
+  <button class="btn glow" id="bOpen" type="button">VER Y PAGAR</button>
 </div>
 
 <!-- Visor -->
@@ -248,7 +265,8 @@ h1{margin:14px 0 0;font-size:34px;font-weight:300;letter-spacing:.04em;color:var
   // ====== CONFIGURACIÓN ======
   var API = 'https://script.google.com/macros/s/AKfycbxlfzv8HLsKcBwLiXujU6tgWmQ3ZGpNIWyGRJMF1_ovRFOlZXBUjhJJ88lhaZmgxqwZnQ/exec';
   var WM_TEXT = 'LUCASMARTINEZA';
-  var WM_OPACITY = 0.32;
+  var WM_OPACITY = 0.55;      // trama diagonal
+  var WM_BIG_OPACITY = 0.8; // sello central
   var TIERS = [[1, 10000, '1 foto'], [2, 8000, '2 fotos'], [3, 7000, '3 fotos'], [4, 6000, '4 o más']];
   // ===========================
 
@@ -260,12 +278,22 @@ h1{margin:14px 0 0;font-size:34px;font-weight:300;letter-spacing:.04em;color:var
 
   // Marca de agua: un SVG repetido en diagonal
   (function setWatermark() {
-    var svg = '<svg xmlns="http://www.w3.org/2000/svg" width="260" height="120">' +
-      '<text x="130" y="66" text-anchor="middle" transform="rotate(-28 130 60)" ' +
+    // Texto blanco con contorno oscuro: se lee tanto sobre cielo claro como sobre sombras
+    var svg = '<svg xmlns="http://www.w3.org/2000/svg" width="200" height="90">' +
+      '<text x="100" y="51" text-anchor="middle" transform="rotate(-28 100 45)" ' +
       'font-family="Montserrat, Arial, sans-serif" font-size="13" font-weight="500" letter-spacing="3" ' +
-      'fill="rgba(255,255,255,' + WM_OPACITY + ')" stroke="rgba(0,0,0,' + (WM_OPACITY * 0.35).toFixed(2) + ')" stroke-width=".6">' +
+      'fill="#fff" fill-opacity="' + WM_OPACITY + '" stroke="#000" stroke-opacity="0.4" stroke-width="1" paint-order="stroke">' +
       WM_TEXT + '</text></svg>';
-    document.documentElement.style.setProperty('--wm', 'url("data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg) + '")');
+    var big = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 220">' +
+      '<g transform="rotate(-18 300 110)">' +
+      '<text x="300" y="104" text-anchor="middle" font-family="Montserrat, Arial, sans-serif" font-size="52" font-weight="500" letter-spacing="8" ' +
+      'fill="#fff" fill-opacity="' + WM_BIG_OPACITY + '" stroke="#000" stroke-opacity="0.5" stroke-width="2.2" paint-order="stroke">' + WM_TEXT + '</text>' +
+      '<text x="300" y="142" text-anchor="middle" font-family="Montserrat, Arial, sans-serif" font-size="15" font-weight="500" letter-spacing="6" ' +
+      'fill="#fff" fill-opacity="' + WM_BIG_OPACITY + '" stroke="#000" stroke-opacity="0.5" stroke-width="1.2" paint-order="stroke">VISTA PREVIA · COMPRÁ LA FOTO SIN MARCA</text>' +
+      '</g></svg>';
+    var root = document.documentElement.style;
+    root.setProperty('--wm', 'url("data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg) + '")');
+    root.setProperty('--wm-big', 'url("data:image/svg+xml;charset=utf-8,' + encodeURIComponent(big) + '")');
   })();
 
   // Evita guardar con clic derecho o arrastrando
@@ -324,6 +352,7 @@ h1{margin:14px 0 0;font-size:34px;font-weight:300;letter-spacing:.04em;color:var
 
   function renderHome() {
     parkCart();
+    currentPhotos = [];
     renderStrip(null);
     showCart(false);
     document.title = 'Eventos · Lucas Martinez';
@@ -386,7 +415,7 @@ h1{margin:14px 0 0;font-size:34px;font-weight:300;letter-spacing:.04em;color:var
     view.innerHTML =
       '<div class="wrap"><section class="main">' + crumbs +
       '<div class="gridhead"><h1 class="h2">' + esc(clean(node.name)) + '</h1>' +
-      (node.photos.length ? '<span class="hint">TOCÁ LAS FOTOS PARA ELEGIRLAS</span>' : '') + '</div>' +
+      (node.photos.length ? '<span style="display:flex;align-items:center;gap:20px;flex-wrap:wrap"><span class="hint">TOCÁ LAS FOTOS PARA ELEGIRLAS</span><button class="clear" type="button" data-clear-folder id="fClear" hidden>DESELECCIONAR ESTA CARPETA</button></span>' : '') + '</div>' +
       (node.folders.length && !node.photos.length ? '<p class="lead" style="margin-top:10px">Elegí una carpeta para ver las fotos.</p>' : '') +
       folders + photos +
       '</section><div id="cartSlot" style="flex:1 1 300px;max-width:380px"></div></div>';
@@ -402,6 +431,9 @@ h1{margin:14px 0 0;font-size:34px;font-weight:300;letter-spacing:.04em;color:var
     var n = items.length, unit = unitFor(n), total = n ? unit * n : 0;
 
     $('cCount').textContent = plural(n);
+    $('cClear').hidden = n === 0;
+    var fc = $('fClear');
+    if (fc) fc.hidden = !currentPhotos.some(function (p) { return cart[p.id]; });
     $('cEmpty').hidden = n > 0;
     $('cList').innerHTML = items.map(function (it) {
       return '<li><span class="mini wm"><img src="' + img(it.p, 200) + '" alt=""></span>' +
@@ -542,8 +574,20 @@ h1{margin:14px 0 0;font-size:34px;font-weight:300;letter-spacing:.04em;color:var
     if (m) renderFolder(m[1]); else renderHome();
   }
 
+  function afterBulk() {
+    saveCart();
+    document.querySelectorAll('.ph').forEach(function (el) {
+      var on = !!cart[el.dataset.id];
+      el.classList.toggle('sel', on);
+      el.querySelector('.pick').setAttribute('aria-pressed', on);
+    });
+    renderCart();
+  }
+
   // ---------- eventos de la página ----------
   document.addEventListener('click', function (e) {
+    if (e.target.closest('[data-clear]')) { cart = {}; return afterBulk(); }
+    if (e.target.closest('[data-clear-folder]')) { currentPhotos.forEach(function (p) { delete cart[p.id]; }); return afterBulk(); }
     var t = e.target.closest('[data-pick],[data-zoom],[data-remove],[data-go]');
     if (!t) return;
     if (t.dataset.pick !== undefined) toggle(currentPhotos[+t.dataset.pick]);
